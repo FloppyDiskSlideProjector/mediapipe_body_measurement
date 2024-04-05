@@ -5,8 +5,9 @@ from scripts.options import options
 if __name__ == "__main__":
     
     img = cv2.imread(options.chess_board_img_path)
+    cv2.imwrite("image_corr_before.jpg",img)
     chess_img = image_process.image_correction(img)
-    cv2.imwrite("image_corr_result.jpg",chess_img)
+    cv2.imwrite("image_corr_after.jpg",chess_img)
     
 
     """
