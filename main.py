@@ -5,9 +5,6 @@ from utils.drawing_tool import plot_points
 
 from argparse import ArgumentParser
 
-
-import cv2
-
 def measure():
     read_corr_save_image()
 
@@ -30,6 +27,8 @@ def get_args():
 
 def update_env():
     prepare_img_corr_param()
+    
+    # update x,y scale? maybe need actual photo
 
 
 if __name__ == "__main__":
