@@ -16,3 +16,6 @@ class options:
     chess_board_img_path = os.path.join("data","normalization","chess_bord.jpeg")
 
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+
+    corr_param_path = os.path.join("scripts","corr_param.npy")
+    corrected_image_path = os.path.join("data","image","corrected_image.jpeg")

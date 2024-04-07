@@ -4,16 +4,17 @@ import numpy as np
 import cv2
 
 
-def get_image(image_path = options.image_path):
+def get_mp_image(image_path = options.corrected_image_path):
     return mp.Image.create_from_file(image_path)
     
 
-def chess_board_corners(image,gray,r):
+def chess_board_corners(image,r):
 	square_size=int(r+1)
-	ret, corners = cv2.findChessboardCorners(gray, (options.rectangle_row,options.rectangle_col),None)
-	corners2 = cv2.cornerSubPix(gray,corners,(11,11),(-1,-1),options.criteria)
-	# Uncomment for old opencv version
-	corners2 = cv2.cornerSubPix(gray,corners, (11,11), (-1,-1), options.criteria)
+	ret, corners = cv2.findChessboardCorners(image, (options.rectangle_row,options.rectangle_col),None)
+	if type(corners) == None:
+		raise ValueError("Corner not found\nrecomendation1: modify image_filter(image)\nrecomendation2: use another image")
+	corners2 = cv2.cornerSubPix(image,corners,(11,11),(-1,-1),options.criteria)
+
 	coordinates=[]
 	coordinates.append((corners2[0,0,0],corners2[0,0,1]))
 	coordinates.append((corners2[square_size-1,0,0],corners2[square_size-1,0,1]))
@@ -30,12 +31,11 @@ def image_filter(image):
 	return filtered_image
 	
 
-
-def analyze_chessboard(image):
+def corr_param_from_chessboard(image):
 	
 	gray=image_filter(image)
 
-	refPt=chess_board_corners(image,gray,options.affine_correction_r1)
+	refPt=chess_board_corners(gray,options.affine_correction_r1)
 	pt1=np.asarray(refPt,dtype=np.float32)
 	dist=(refPt[1][0]-refPt[0][0])
 	refPt[1]=(refPt[0][0]+dist,refPt[0][1])
@@ -45,15 +45,24 @@ def analyze_chessboard(image):
 	M=cv2.getPerspectiveTransform(pt1,pt2)
 	return M
 
+
+def prepare_img_corr_param():
+	chess_bord_img = cv2.imread(options.chess_board_img_path)
+	affine_correct_params = corr_param_from_chessboard(chess_bord_img)
+	np.save(options.corr_param_path,affine_correct_params)
+
     
 def image_correction(image): # cv image
-	chess_bord_img = cv2.imread(options.chess_board_img_path)
-	affine_correct_params = analyze_chessboard(chess_bord_img)
+	affine_correct_params = np.load(options.corr_param_path)
 
 	image2 = np.copy(image)
-
-	if(len(image2)<3):
-		image2=cv2.cvtColor(image2,cv2.COLOR_GRAY2RGB)
-	
+	# if(len(image2)<3):
+	# 	image2=cv2.cvtColor(image2,cv2.COLOR_GRAY2RGB)
 	dst=cv2.warpPerspective(image2,affine_correct_params,(image.shape[1],image.shape[0]))
 	return dst
+
+
+def read_corr_save_image(image_path = options.image_path):
+	image = cv2.imread(options.image_path)
+	image = image_correction(image)
+	image = cv2.imwrite(options.corrected_image_path,image)
