@@ -14,7 +14,7 @@ def chess_board_corners(image,r):
 	if type(corners) == None:
 		raise ValueError("Corner not found\nrecomendation1: modify image_filter(image)\nrecomendation2: use another image")
 	corners2 = cv2.cornerSubPix(image,corners,(11,11),(-1,-1),options.criteria)
-
+	
 	coordinates=[]
 	coordinates.append((corners2[0,0,0],corners2[0,0,1]))
 	coordinates.append((corners2[square_size-1,0,0],corners2[square_size-1,0,1]))
@@ -63,6 +63,6 @@ def image_correction(image): # cv image
 
 
 def read_corr_save_image(image_path = options.image_path):
-	image = cv2.imread(options.image_path)
+	image = cv2.imread(image_path)
 	image = image_correction(image)
 	image = cv2.imwrite(options.corrected_image_path,image)

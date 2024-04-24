@@ -8,15 +8,21 @@ from argparse import ArgumentParser
 def measure():
     read_corr_save_image()
 
-    detector = get_detector()
     mp_image = get_mp_image()
     
+    detector = get_detector()
     detection_result = detector.detect(mp_image)
+    pose_detect_check(detection_result)
     measurement = get_measurement(detection_result)
     
     plot_points(detection_result = detection_result)
     
     print(measurement)
+
+
+def pose_detect_check(detection_result):
+    if len(detection_result.pose_landmarks) == 0:
+        raise(ValueError("pose have not detected"))
 
 
 def get_args():
