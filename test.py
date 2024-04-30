@@ -1,10 +1,13 @@
-from utils import image_process
+from utils.detector import get_detector
+from utils.image_process import get_mp_image, prepare_img_corr_param, read_corr_save_image
+from utils.handle_result import get_measurement
+from utils.drawing_tool import plot_points
 import cv2
 from scripts.options import options
 
 if __name__ == "__main__":
     
-    image_process.read_corr_save_image()
+    prepare_img_corr_param()
     
 
     """

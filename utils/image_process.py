@@ -4,22 +4,26 @@ import numpy as np
 import cv2
 
 
+import matplotlib.pyplot as plt
+
+
 def get_mp_image(image_path = options.corrected_image_path):
     return mp.Image.create_from_file(image_path)
     
 
-def chess_board_corners(image,r):
+def chess_board_corners(image,r,mode = "pixel"):
 	square_size=int(r+1)
 	ret, corners = cv2.findChessboardCorners(image, (options.rectangle_row,options.rectangle_col),None)
 	if type(corners) == None:
 		raise ValueError("Corner not found\nrecomendation1: modify image_filter(image)\nrecomendation2: use another image")
 	corners2 = cv2.cornerSubPix(image,corners,(11,11),(-1,-1),options.criteria)
-	
+
 	coordinates=[]
 	coordinates.append((corners2[0,0,0],corners2[0,0,1]))
 	coordinates.append((corners2[square_size-1,0,0],corners2[square_size-1,0,1]))
 	coordinates.append((corners2[options.rectangle_row*(square_size-1),0,0],corners2[options.rectangle_row*(square_size-1),0,1]))
 	coordinates.append((corners2[options.rectangle_row*(square_size-1)+square_size-1,0,0],corners2[options.rectangle_row*(square_size-1)+square_size-1,0,1]))
+	
 	return coordinates
 
 
@@ -54,7 +58,6 @@ def prepare_img_corr_param():
     
 def image_correction(image): # cv image
 	affine_correct_params = np.load(options.corr_param_path)
-
 	image2 = np.copy(image)
 	# if(len(image2)<3):
 	# 	image2=cv2.cvtColor(image2,cv2.COLOR_GRAY2RGB)
@@ -62,7 +65,36 @@ def image_correction(image): # cv image
 	return dst
 
 
-def read_corr_save_image(image_path = options.image_path):
-	image = cv2.imread(image_path)
+def read_corr_save_image(input_img_path, output_img_path):
+	image = cv2.imread(input_img_path)
 	image = image_correction(image)
-	image = cv2.imwrite(options.corrected_image_path,image)
+	image = cv2.imwrite(output_img_path,image)
+
+
+def update_img_scale(chess_bord_img_path = options.chess_board_img_path):
+    #prepare_image
+	image = cv2.imread(chess_bord_img_path)
+	corrected_image = image_correction(image)
+	gray=image_filter(corrected_image)
+
+	#find corner
+	corners=chess_board_corners(gray,options.affine_correction_r1)
+
+	#calculate xy scale
+	img_height = image.shape[0]
+	img_width = image.shape[1]
+	corner_height = (corners[2][1]+corners[3][1])/2 - (corners[0][1]+corners[1][1])/2
+	corner_width = (corners[1][0]+corners[3][0])/2 - (corners[0][0]+corners[2][0])/2
+	
+	new_x_scale = options.real_world_width*img_width/corner_width
+	new_y_scale = options.real_world_height*img_width/corner_height
+	
+	file = open(options.xy_scale_path,'w')
+	file.write("x " + str(new_x_scale)+'\n')
+	file.write("y " + str(new_y_scale))
+	file.close()
+
+	#update options
+	options.update_xy_scale()
+	
+	
