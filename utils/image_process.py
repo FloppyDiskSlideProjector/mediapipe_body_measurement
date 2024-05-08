@@ -14,7 +14,7 @@ def get_mp_image(image_path = options.corrected_image_path):
 def chess_board_corners(image,r,mode = "pixel"):
 	square_size=int(r+1)
 	ret, corners = cv2.findChessboardCorners(image, (options.rectangle_row,options.rectangle_col),None)
-	if type(corners) == None:
+	if ret == False:
 		raise ValueError("Corner not found\nrecomendation1: modify image_filter(image)\nrecomendation2: use another image")
 	corners2 = cv2.cornerSubPix(image,corners,(11,11),(-1,-1),options.criteria)
 
@@ -89,6 +89,9 @@ def update_img_scale(chess_bord_img_path = options.chess_board_img_path):
 	new_x_scale = options.real_world_width*img_width/corner_width
 	new_y_scale = options.real_world_height*img_width/corner_height
 	
+	new_x_scale = new_x_scale*options.real_life_x_scale
+	new_y_scale = new_y_scale*options.real_life_y_scale
+
 	file = open(options.xy_scale_path,'w')
 	file.write("x " + str(new_x_scale)+'\n')
 	file.write("y " + str(new_y_scale))

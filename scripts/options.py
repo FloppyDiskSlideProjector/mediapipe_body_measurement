@@ -38,5 +38,11 @@ class Options:
 
     xy_scale_path = os.path.join("data","resource","xy_scale.txt")
 
+    # when the distance between camera and person is 2.4m
+    # this value could be vary
+    # depends on the environment
+    real_life_x_scale = 1.24062972
+    real_life_y_scale = 1.24062972
+
 
 options = Options()
